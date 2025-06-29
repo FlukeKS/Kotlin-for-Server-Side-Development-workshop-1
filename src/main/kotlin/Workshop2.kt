@@ -12,20 +12,18 @@ fun main() {
     // สินค้า name = "Keyboard", price = 499.0, category = "Electronics" // ราคาไม่เกิน 500
     // สินค้า name = "Jeans", price = 1200.0, category = "Apparel"
     // สินค้า name = "Headphones", price = 1800.0, category = "Electronics" // ตรงตามเงื่อนไข
-//🚨
     val products = listOf(
-        Product("laptop", 35000.0, "Electronics"),
-        Product("SmartPhone", 25000.0, "Electronics"),
-        Product("T-Shirt", 450.0, "Apparel"),
-        Product("Monitor", 7500.0, "Electronics"),
-        Product("Keyboard", 499.0, "Electronics"),
-        Product("Jeans", 1200.0, "Apparel"),
-        Product("Headphones", 1800.0, "Electronics"),
+        Product ("Labtop",35000.0, category = "Electronics ") ,
+        Product (name = "Smartphone", price = 25000.0, category = "Electronics"),
+        Product (name = "T-shirt", price = 450.0, category = "Apparel"),
+        Product (name = "Monitor", price = 7500.0, category = "Electronics"),
+        Product (name = "Keyboard", price = 499.0, category = "Electronics"),
+        Product (name = "Jeans", price = 1200.0, category = "Apparel"),
+        Product (name = "Headphones", price = 1800.0, category = "Electronics")
     )
 
-
     println("รายการสินค้าทั้งหมด:")
-products.forEach { println(it) }
+    products.forEach { println(it) }
     println("--------------------------------------------------")
 
     // --- โจทย์: จงหาผลรวมราคาสินค้าทั้งหมดในหมวด 'Electronics' ที่มีราคามากกว่า 500 บาท ---
@@ -35,8 +33,7 @@ products.forEach { println(it) }
     // กรองสินค้าที่ราคามากกว่า 500
     // ดึงเฉพาะราคาออกมาเป็น List<Double>
     // หาผลรวมของราคา
-//🚨
-    val totalElecPriceOver500 = products.filter {it.category == "Electronics" && it.price > 500}.map{it.price}.fold(0.0) {acc, i -> acc + i}
+    val totalElecPriceOver500 = products.filter { it.category == "Electronics" && it.price>500 }.map { it.price }.fold(initial = 0.0){acc,i->acc+1}
 
     println("วิธีที่ 1: ใช้ Chaining กับ List")
     println("ผลรวมราคาสินค้า Electronics ที่ราคา > 500 บาท: $totalElecPriceOver500 บาท")
@@ -45,10 +42,9 @@ products.forEach { println(it) }
 
     // 4. (ขั้นสูง) วิธีที่ 2: การใช้ .asSequence() เพื่อเพิ่มประสิทธิภาพ
     // แปลง List เป็น Sequence ก่อนเริ่มประมวลผล
-//🚨
     val totalElecPriceOver500Sequence = products.asSequence()
-        .filter {it.category == "Electronics" && it.price > 500}
-        .map { it.price }.fold(0.0) {acc, i -> acc + i}
+        .filter { it.category == "Electronics" && it.price>500}
+        .sumOf { it.price }
 
     println("วิธีที่ 2: ใช้ .asSequence() (ขั้นสูง)")
     println("ผลรวมราคาสินค้า Electronics ที่ราคา > 500 บาท: $totalElecPriceOver500Sequence บาท")
@@ -69,26 +65,29 @@ products.forEach { println(it) }
     println("   - จะไม่มีการสร้าง Collection กลางทาง ทำให้ประหยัดหน่วยความจำและเร็วกว่ามากสำหรับชุดข้อมูลขนาดใหญ่ เพราะทำงานกับข้อมูลทีละชิ้นและทำทุกขั้นตอนให้เสร็จในรอบเดียว")
     println("   - การคำนวณจะเกิดขึ้นเมื่อมี 'Terminal Operation' มาเรียกใช้เท่านั้น (ในที่นี้คือ .sum())")
 
-    println("\n----แบ่งตามช่วงราคา----")
 
-    val groupProducts = products.groupBy {
-        when {
-            it.price <= 1000.0 -> "ราคาไม่เกิน 1,000 บาท"
-            it.price > 1000.0 && it.price < 10000.0 -> "ราคา 1,000 - 9,000"
-            else -> "ราคา 10,000  บาทขึ้นไป"
-        }
-    }
+    println("_____________________วิธีที่22__________")
+// แบ่งกลุ่มสินค้าตามราคา
+    val groupUnder1000 = products.filter { it.price < 1000 }
+    val groupBetween1000And9999 = products.filter { it.price in 1001.0..9999.0 }
+    val groupAbove10000 = products.filter { it.price >= 10000 }
 
-    groupProducts.forEach { (range, productlist) ->
-        println("\nกลุ่ม : $range")
-        if (productlist.isEmpty()) {
-            println("ไม่มีสินค้าในกลุ่มนี้")
-            } else {
-                productlist.forEach { product ->
-                    println(" - ${product.name} (ราคา : ${"%.2f".format(product.price)} บาท) ")
-                }
-        }
+    println("กลุ่มที่ 1: สินค้าราคาไม่เกิน 1,000 บาท")
+    groupUnder1000.forEach { println(it) }
 
+    println("\nกลุ่มที่ 2: สินค้าราคาระหว่าง 1,000 - 9,999 บาท")
+    groupBetween1000And9999.forEach { println(it) }
 
-    }
+    println("\nกลุ่มที่ 3: สินค้าราคา 10,000 บาทขึ้นไป")
+    groupAbove10000.forEach { println(it) }
+
+}
+fun calculateTotalElectronicsPriceOver500(products: List<Product>): Double {
+    return products
+        .filter { it.category.trim() == "Electronics" && it.price > 500 }
+        .sumOf { it.price }
+}
+
+fun countElectronicsOver500(products: List<Product>): Int {
+    return products.count { it.category.trim() == "Electronics" && it.price > 500 }
 }
